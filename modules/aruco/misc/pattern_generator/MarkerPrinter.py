@@ -979,170 +979,86 @@ class MarkerPrinter:
 if __name__ == '__main__':
     parser = ArgumentParser()
 
-    # Save marker image parameters
-    chessGroup = parser.add_argument_group('chess', 'Chessboard')
-    arucoGroup = parser.add_argument_group('aruco', 'ArUco')
-    arucoGridGroup = parser.add_argument_group('aruco_grid', 'ArUco grid')
-    charucoGroup = parser.add_argument_group('charuco', 'ChArUco')
-    exclusiveGroup = parser.add_mutually_exclusive_group()
+    subparsers = parser.add_subparsers(help='Choose a format to create and save', dest="type")
 
-    exclusiveGroup.add_argument(
-        "--chess", action='store_true', default=False,
-        help="Choose to save chessboard marker")
+    parser_chess = subparsers.add_parser('chess', help='Generate a chessboard')
+    parser_aruco = subparsers.add_parser('aruco', help='Generate an ArUco tag')
+    parser_arucogrid = subparsers.add_parser('aruco_grid', help='Generate an ArUco grid')
+    parser_charuco = subparsers.add_parser('charuco', help='Generate an ChArUco grid')
+    parser_list_dict = subparsers.add_parser('list_dict', help='List available aruco dictionaries')
+    parser_bytesave = subparsers.add_parser('generate', help='Save byte-wise ArUco data to file')
 
-    exclusiveGroup.add_argument(
-        "--aruco", action='store_true', default=False,
-        help="Choose to save ArUco marker")
-
-    exclusiveGroup.add_argument(
-        "--aruco_grid", action='store_true', default=False,
-        help="Choose to save ArUco grid marker")
-
-    exclusiveGroup.add_argument(
-        "--charuco", action='store_true', default=False,
-        help="Choose to save ChArUco marker")
-
-    # Utility functions parameters
-    exclusiveGroup.add_argument(
-        "--generate", dest="arucoDataFileName",
-        help="Generate aruco data to FILE", metavar="FILE")
-
-    exclusiveGroup.add_argument(
-        "--list_dictionary", action='store_true', default=False,
-        help="List predefined aruco dictionary")
-
-    # Parameters
-    # fileName
-    parser.add_argument(
-        "--file", dest="fileName", default="./image.pdf",
-        help="Save marker image to FILE", metavar="FILE")
-    for group in [chessGroup, arucoGroup, arucoGridGroup, charucoGroup]:
+    for group in [parser_chess, parser_aruco, parser_arucogrid, parser_charuco, parser_bytesave]:
         group.add_argument(
-            "--" + group.title + "_file", dest="fileName",
+            "--file", dest="fileName",
             help="Save marker image to FILE", metavar="FILE")
 
-    # dictionary
-    parser.add_argument(
-        "--dictionary", dest="dictionary", default="DICT_ARUCO_ORIGINAL",
-        help="Generate marker via predefined DICTIONARY aruco dictionary", metavar="DICTIONARY")
-    for group in [arucoGroup, arucoGridGroup, charucoGroup]:
+    for group in [parser_chess, parser_aruco, parser_arucogrid, parser_charuco]:
         group.add_argument(
-            "--" + group.title + "_dictionary", dest="dictionary",
-            help="Generate marker via predefined DICTIONARY aruco dictionary", metavar="DICTIONARY")
-
-    # size
-    parser.add_argument(
-        "--size_x", dest="sizeX", default="16",
-        help="Save marker image with N board width", metavar="N")
-    parser.add_argument(
-        "--size_y", dest="sizeY", default="9",
-        help="Save marker image with N board height", metavar="N")
-
-    for group in [chessGroup, arucoGridGroup, charucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_size_x", dest="sizeX",
-            help="Save marker image with N board width", metavar="N")
-        group.add_argument(
-            "--" + group.title + "_size_y", dest="sizeY",
-            help="Save marker image with N board height", metavar="N")
-
-    # length
-    parser.add_argument(
-        "--square_length", dest="squareLength", default="0.09",
-        help="Save marker image with L square length (Unit: meter)", metavar="L")
-    parser.add_argument(
-        "--marker_length", dest="markerLength", default="0.07",
-        help="Save marker image with L marker length (Unit: meter)", metavar="L")
-    parser.add_argument(
-        "--marker_separation", dest="markerSeparation", default="0.02",
-        help="Save marker image with L separation length (Unit: meter)", metavar="L")
-
-    for group in [chessGroup, charucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_square_length", dest="squareLength",
-            help="Save marker image with L blocks length (Unit: meter)", metavar="L")
-
-    for group in [arucoGroup, arucoGridGroup, charucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_marker_length", dest="markerLength",
-            help="Save marker image with L marker length (Unit: meter)", metavar="L")
-
-    for group in [arucoGridGroup]:
-        group.add_argument(
-            "--" + group.title + "_marker_separation", dest="markerSeparation",
-            help="Save marker image with L gap length (Unit: meter)", metavar="L")
-
-    # else
-    parser.add_argument(
-        "--marker_id", dest="markerID", default="0",
-        help="Save marker image with ID marker", metavar="ID")
-    parser.add_argument(
-        "--first_marker", dest="firstMarker", default="0",
-        help="Save marker image that start with ID marker", metavar="ID")
-    parser.add_argument(
-        "--border_bits", dest="borderBits", default="1",
-        help="Save marker image with N border size", metavar="N")
-
-    for group in [arucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_marker_id", dest="markerID",
-            help="Save marker image with ID marker", metavar="ID")
-
-    for group in [arucoGridGroup]:
-        group.add_argument(
-            "--" + group.title + "_first_marker", dest="firstMarker",
-            help="Save marker image that start with ID marker", metavar="ID")
-
-    for group in [arucoGroup, arucoGridGroup, charucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_border_bits", dest="borderBits",
-            help="Save marker image with N border size", metavar="N")
-
-    # sub size
-    parser.add_argument(
-        "--sub_size_x", dest="subSizeX", default="0",
-        help="Save marker image with N chuck width", metavar="N")
-    parser.add_argument(
-        "--sub_size_y", dest="subSizeY", default="0",
-        help="Save marker image with N chuck height", metavar="N")
-
-    for group in [chessGroup, arucoGridGroup, charucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_sub_size_x", dest="subSizeX",
-            help="Save marker image with N chuck width", metavar="N")
-        group.add_argument(
-            "--" + group.title + "_sub_size_y", dest="subSizeY",
-            help="Save marker image with N chuck height", metavar="N")
-
-    # page border
-    parser.add_argument(
-        "--page_border_x", dest="pageBorderX", default="0",
-        help="Save with page border width L length (Unit: meter)", metavar="L")
-    parser.add_argument(
-        "--page_border_y", dest="pageBorderY", default="0",
-        help="Save with page border height L length (Unit: meter)", metavar="L")
-
-    for group in [chessGroup, arucoGroup, arucoGridGroup, charucoGroup]:
-        group.add_argument(
-            "--" + group.title + "_page_border_x", dest="pageBorderX", default="0",
+            "--page_border_x", dest="pageBorderX", default="0",
             help="Save with page border width L length (Unit: meter)", metavar="L")
         group.add_argument(
-            "--" + group.title + "_page_border_y", dest="pageBorderY", default="0",
+            "--page_border_y", dest="pageBorderY", default="0",
             help="Save with page border height L length (Unit: meter)", metavar="L")
+
+    for group in [parser_aruco, parser_arucogrid, parser_charuco]:
+        group.add_argument(
+            "--marker_length", dest="markerLength",
+            help="Save marker image with L marker length (Unit: meter)", metavar="L")
+        group.add_argument(
+            "--border_bits", dest="borderBits",
+            help="Save marker image with N border size", metavar="N")
+        group.add_argument(
+            "--dictionary", dest="dictionary",
+            help="Generate marker via predefined DICTIONARY aruco dictionary", metavar="DICT")
+
+    for group in [parser_chess,  parser_arucogrid, parser_charuco]:
+        group.add_argument(
+            "--size_x", dest="sizeX",
+            help="Save marker image with N board width", metavar="N")
+        group.add_argument(
+            "--size_y", dest="sizeY",
+            help="Save marker image with N board height", metavar="N")
+        group.add_argument(
+            "--sub_size_x", dest="subSizeX",
+            help="Save marker image with N chuck width", metavar="N")
+        group.add_argument(
+            "--sub_size_y", dest="subSizeY",
+            help="Save marker image with N chuck height", metavar="N")
+
+    for group in [parser_chess, parser_charuco]:
+        group.add_argument(
+            "--square_length", dest="squareLength",
+            help="Save marker image with L blocks length (Unit: meter)", metavar="L")
+
+    for group in [parser_arucogrid, parser_charuco]:
+        group.add_argument(
+            "--first_marker", dest="firstMarker",
+            help="Save marker image that start with ID marker", metavar="ID")
+
+    for group in [parser_arucogrid]:
+        group.add_argument(
+            "--marker_separation", dest="markerSeparation",
+            help="Save marker image with L gap length (Unit: meter)", metavar="L")
+
+    for group in [parser_aruco]:
+        group.add_argument(
+            "--marker_id", dest="markerID",
+            help="Save marker image with ID marker", metavar="ID")
 
     # Run
     args = parser.parse_args()
 
-    if(args.arucoDataFileName is not None):
-        print("Generate aruco data to: " + args.arucoDataFileName)
-        SaveArucoDictBytesList(args.arucoDataFileName)
+    if(args.type == "generate"):
+        print("Generate aruco data to: " + args.fileName)
+        SaveArucoDictBytesList(args.fileName)
 
-    elif(args.list_dictionary):
-        print("List predefined aruco dictionary")
+    elif(args.type == "list_dict"):
+        print("Available aruco dictionaries:")
         for i in MarkerPrinter.arucoDictBytesList.keys():
             print(i)
 
-    elif(args.chess):
+    elif(args.type == "chess"):
         try:
             sizeX = int(args.sizeX)
             sizeY = int(args.sizeY)
@@ -1151,10 +1067,11 @@ if __name__ == '__main__':
             subSizeY = int(args.subSizeY)
             pageBorderX = float(args.pageBorderX)
             pageBorderY = float(args.pageBorderY)
-        except ValueError as e:
+        except (TypeError, ValueError) as e:
             warnings.warn(str(e))
+            parser_chess.print_help()
         else:
-            print("Save chessboard marker with parms: " + \
+            print("Saving chessboard marker with parms: " + \
                     str({ \
                         "fileName": args.fileName, \
                         "sizeX": sizeX, \
@@ -1182,17 +1099,18 @@ if __name__ == '__main__':
             # Gen
             MarkerPrinter.GenChessMarkerImage(args.fileName, (sizeX, sizeY), squareLength, subSize = subSize, pageBorder = (pageBorderX, pageBorderY))
 
-    elif(args.aruco):
+    elif(args.type == "aruco"):
         try:
             markerLength = float(args.markerLength)
             markerID = int(args.markerID)
             borderBits = int(args.borderBits)
             pageBorderX = float(args.pageBorderX)
             pageBorderY = float(args.pageBorderY)
-        except ValueError as e:
+        except (TypeError, ValueError) as e:
             warnings.warn(str(e))
+            parser_aruco.print_help()
         else:
-            print("Save ArUco marker with parms: " + \
+            print("Saving ArUco marker with parms: " + \
                     str({ \
                         "fileName": args.fileName, \
                         "dictionary": args.dictionary, \
@@ -1206,7 +1124,7 @@ if __name__ == '__main__':
             # Gen
             MarkerPrinter.GenArucoMarkerImage(args.fileName, args.dictionary, markerID, markerLength, borderBits=borderBits, pageBorder = (pageBorderX, pageBorderY))
 
-    elif(args.aruco_grid):
+    elif(args.type == "aruco_grid"):
         try:
             sizeX = int(args.sizeX)
             sizeY = int(args.sizeY)
@@ -1218,10 +1136,11 @@ if __name__ == '__main__':
             subSizeY = int(args.subSizeY)
             pageBorderX = float(args.pageBorderX)
             pageBorderY = float(args.pageBorderY)
-        except ValueError as e:
+        except (TypeError, ValueError) as e:
             warnings.warn(str(e))
+            parser_arucogrid.print_help()
         else:
-            print("Save ArUco grid marker with parms: " + \
+            print("Saving ArUco grid marker with parms: " + \
                     str({ \
                         "fileName": args.fileName, \
                         "dictionary": args.dictionary, \
@@ -1253,21 +1172,23 @@ if __name__ == '__main__':
             # Gen
             MarkerPrinter.GenArucoGridMarkerImage(args.fileName, args.dictionary, (sizeX, sizeY), markerLength, markerSeparation, firstMarker, borderBits=borderBits, subSize=subSize, pageBorder = (pageBorderX, pageBorderY))
 
-    elif(args.charuco):
+    elif(args.type == "charuco"):
         try:
             sizeX = int(args.sizeX)
             sizeY = int(args.sizeY)
             squareLength = float(args.squareLength)
             markerLength = float(args.markerLength)
+            firstMarker = int(args.firstMarker)
             borderBits = int(args.borderBits)
             subSizeX = int(args.subSizeX)
             subSizeY = int(args.subSizeY)
             pageBorderX = float(args.pageBorderX)
             pageBorderY = float(args.pageBorderY)
-        except ValueError as e:
+        except (TypeError, ValueError) as e:
             warnings.warn(str(e))
+            parser_charuco.print_help()
         else:
-            print("Save ChArUco marker with parms: " + \
+            print("Saving ChArUco marker with parms: " + \
                     str({ \
                         "fileName": args.fileName, \
                         "dictionary": args.dictionary, \
